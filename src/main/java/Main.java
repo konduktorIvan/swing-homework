@@ -21,6 +21,7 @@ import static javax.swing.JOptionPane.ERROR_MESSAGE;
 import static javax.swing.JOptionPane.showMessageDialog;
 
 public class Main extends JFrame {
+
     private JFrame mainFrame = new JFrame(); //main frame
     private JPanel buttonPanel;
     private JButton enterSizeButton; // button for enter size on main screen
@@ -28,13 +29,17 @@ public class Main extends JFrame {
     private JButton sortButton;  // sort button on sort screen
     private JScrollPane buttonScrollPane;
     private JTextField sizeTextField; // field for enter number
-    private Random r;
+    private Random rand;
     private JLabel enterSizeLabel; // label for main screen
     private boolean isLower;
     private boolean order = true;
     private int count; //number that input in main screen
     private ArrayList<Integer> listToSort; //list of int for sort
     private List<JButton> buttonList; //list of buttons for show on sort screen
+
+
+
+
 
     static class ColumnLayout implements LayoutManager {
         private int vgap;
@@ -149,18 +154,17 @@ public class Main extends JFrame {
 
     public void showSortScreen(List arrayList) {
         if (arrayList != null) {
+            buttonScrollPane.setVisible(false);
             enterSizeButton.setVisible(false);
             enterSizeLabel.setVisible(false);
             sizeTextField.setVisible(false);
             resetButton.setVisible(true);
             sortButton.setVisible(true);
             buttonScrollPane.setVisible(true);
-
         }
     }
 
     public void resetFrame() { //func that delete buttons from frame, if we need to generate new buttons
-        showMainScreen();
         if (buttonList != null) {
             for (JButton jButton : buttonList) {
                 buttonPanel.remove(jButton);
@@ -172,9 +176,9 @@ public class Main extends JFrame {
         if(size!=0){
             isLower = false;
             listToSort = new ArrayList();
-            r = new Random();
+            rand = new Random();
             for(int i = 0; i < size; i++){
-                this.listToSort.add(r.nextInt(1000)+1);
+                this.listToSort.add(rand.nextInt(1000)+1);
             }
             for (Integer integer : listToSort) {
                 if (integer <= 30) {
@@ -183,12 +187,41 @@ public class Main extends JFrame {
                 }
             }
             if(!isLower){
-                listToSort.set(r.nextInt(listToSort.size()), r.nextInt(30)+1);
+                listToSort.set(rand.nextInt(listToSort.size()), rand.nextInt(30)+1);
             }
             return listToSort;
         }
         return null;
     }
+
+    private void startThread() {
+        sortButton.setEnabled(false);
+        resetButton.setEnabled(false);
+        new Thread() {
+            public void run() {
+                if(order){
+                    try {
+                        sortingDesc(listToSort,0,listToSort.size()-1);
+                        sortButton.setEnabled(true);
+                        resetButton.setEnabled(true);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    order = false;
+                } else {
+                    try {
+                        sortingIncr(listToSort,0,listToSort.size()-1);
+                        sortButton.setEnabled(true);
+                        resetButton.setEnabled(true);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    order = true;
+                }
+            }
+        }.start();
+    }
+
 
     public List<JButton> initButtonsArray(ArrayList intList) {
         resetFrame();
@@ -200,17 +233,13 @@ public class Main extends JFrame {
             for (int i = 0; i < intList.size(); i++) {
                 buttonList.get(i).setText(String.valueOf(intList.get(i)));
                 String temp = buttonList.get(i).getText();
-                buttonList.get(i).addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        if(Integer.parseInt(temp)>30){
-                            showMessageDialog(null, "Number must be less or equal 30", "Error", ERROR_MESSAGE);
-                        }else {
-                            showSortScreen(initButtonsArray(createArray(Integer.parseInt(temp))));
-                        }
+                buttonList.get(i).addActionListener(e -> {
+                    if(Integer.parseInt(temp)>30){
+                        showMessageDialog(null, "Number must be less or equal 30", "Error", ERROR_MESSAGE);
+                    }else {
+                        showSortScreen(initButtonsArray(createArray(Integer.parseInt(temp))));
                     }
                 });
-                //buttonList.get(i).addActionListener(e -> showSortScreen(initButtonsArray(checkClickErrors(temp))));
                 buttonPanel.add(buttonList.get(i));
             }
             return buttonList;
@@ -218,8 +247,7 @@ public class Main extends JFrame {
         return null;
     }
 
-    public int partitionIncr(ArrayList<Integer> list, int low, int high)
-    {
+    public int partitionIncr(ArrayList<Integer> list, int low, int high) throws InterruptedException {
         int pivot = list.get(high);
         int i = (low - 1);
 
@@ -231,7 +259,8 @@ public class Main extends JFrame {
                 int temp = list.get(i);
                 list.set(i, list.get(j));
                 list.set(j, temp);
-
+                Thread.sleep(1000);
+                showSortScreen(initButtonsArray(list));
             }
         }
 
@@ -242,7 +271,7 @@ public class Main extends JFrame {
         return (i + 1);
     }
 
-    public void sortingIncr(ArrayList<Integer> list, int left, int right){
+    public void sortingIncr(ArrayList<Integer> list, int left, int right) throws InterruptedException {
         if(left < right)
         {
             int q = partitionIncr(list, left, right);
@@ -251,7 +280,7 @@ public class Main extends JFrame {
         }
     }
 
-    public int partitionDesc(ArrayList<Integer> list, int low, int high){
+    public int partitionDesc(ArrayList<Integer> list, int low, int high) throws InterruptedException {
         int pivot = list.get(low);
         int i = low;
         for(int j = low + 1; j <= high; j++){
@@ -260,17 +289,19 @@ public class Main extends JFrame {
                 int temp = list.get(i);
                 list.set(i, list.get(j));
                 list.set(j, temp);
-
+                showSortScreen(initButtonsArray(list));
+                Thread.sleep(1000);
             }
         }
         int temp = list.get(i);
         list.set(i, list.get(low));
         list.set(low, temp);
+        Thread.sleep(1000);
         showSortScreen(initButtonsArray(list));
         return i;
 
     }
-    public void sortingDesc(ArrayList<Integer> list, int left, int right){
+    public void sortingDesc(ArrayList<Integer> list, int left, int right) throws InterruptedException {
         if(left < right)
         {
             int q = partitionDesc(list, left, right);
@@ -323,24 +354,11 @@ public class Main extends JFrame {
 
         enterSizeLabel.setBounds(310, 210, 300, 50);
 
-        sortButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(order){
-                    sortingDesc(listToSort,0,listToSort.size()-1);
-                    order = false;
-                } else {
-                    sortingIncr(listToSort,0,listToSort.size()-1);
-                    order = true;
-                }
-
-
-            }
-        });
+        sortButton.addActionListener(event -> startThread());
         sortButton.setBounds(850, 250, 80, 25);
 
         resetButton.setBounds(850, 300, 80, 25);
-        resetButton.addActionListener(e -> resetFrame());
+        resetButton.addActionListener(e -> showMainScreen());
 
         mainFrame.add(buttonScrollPane);
         mainFrame.add(enterSizeLabel);
@@ -356,7 +374,7 @@ public class Main extends JFrame {
     }
 
     public void showMainScreen() {  //show main screen
-
+        resetFrame();
         sizeTextField.setVisible(true);
         enterSizeLabel.setVisible(true);
         sizeTextField.setText("");
@@ -376,5 +394,6 @@ public class Main extends JFrame {
 
     public static void main(String[] args) {
        SwingUtilities.invokeLater(()->new Main());
+
     }
 }
