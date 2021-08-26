@@ -3,7 +3,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.LayoutManager;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,12 +34,12 @@ public class Main extends JFrame {
     private boolean order = true;
     private int count; //number that input in main screen
     private ArrayList<Integer> listToSort; //list of int for sort
-    private List<JButton> buttonList; //list of buttons for show on sort screen
+    private ArrayList<JButton> buttonList; //list of buttons for show on sort screen
 
 
 
 
-
+    //custom layout manager for scroll pane
     static class ColumnLayout implements LayoutManager {
         private int vgap;
         int x;
@@ -70,9 +69,9 @@ public class Main extends JFrame {
             Dimension d = null;
 
             //Reset preferred/minimum width and height.
-            preferredWidth = 0;
+            preferredWidth = 750;
             preferredHeight = 0;
-            minWidth = 0;
+            minWidth = 750;
             minHeight = 0;
 
             for (int i = 0; i < nComps; i++) {
@@ -80,17 +79,10 @@ public class Main extends JFrame {
                 if (c.isVisible()) {
                     d = c.getPreferredSize();
 
-                    if (i > 0) {
-                        preferredWidth += d.width/2;
-                        preferredHeight += vgap;
-                    } else {
-                        preferredWidth = d.width;
+                    if (i > 60 && i%10==0) {
+                        preferredWidth += 85;
+                        minWidth += 85;
                     }
-                    preferredHeight += d.height;
-
-                    minWidth = Math.max(c.getMinimumSize().width,
-                            minWidth);
-                    minHeight = preferredHeight;
                 }
             }
         }
@@ -132,7 +124,7 @@ public class Main extends JFrame {
         }
 
         public void layoutContainer(Container parent) {
-            x = 0;
+            x = 10;
             y = 0;
             int nComps = parent.getComponentCount();
             for (int i = 0; i < nComps; i++) {
@@ -152,26 +144,61 @@ public class Main extends JFrame {
     }
     }
 
-    public void showSortScreen(List arrayList) {
-        if (arrayList != null) {
-            buttonScrollPane.setVisible(false);
-            enterSizeButton.setVisible(false);
-            enterSizeLabel.setVisible(false);
-            sizeTextField.setVisible(false);
-            resetButton.setVisible(true);
-            sortButton.setVisible(true);
-            buttonScrollPane.setVisible(true);
+    //update buttons in sort func
+    public ArrayList<JButton> updateButtons(ArrayList<Integer> intList) {
+        for (int i = 0; i < intList.size(); i++) {
+            buttonList.get(i).setText(String.valueOf(intList.get(i)));
+            String temp = buttonList.get(i).getText();
+                for( ActionListener al : buttonList.get(i).getActionListeners() ) {
+                    buttonList.get(i).removeActionListener( al );
+                }
+            buttonList.get(i).addActionListener(e -> {
+                if (Integer.parseInt(temp) > 30) {
+                    showMessageDialog(null, "Number must be less or equal 30", "Error", ERROR_MESSAGE);
+                } else {
+                    showSortScreen(initButtonsArray(createArray(Integer.parseInt(temp))));
+                }
+            });
         }
+        return buttonList;
     }
 
+    //add buttons to button panel
+    public List<JButton> initButtonsArray(ArrayList intList) {
+        resetFrame();
+        order = true;
+        if (intList != null) {
+            buttonList = new ArrayList<>();
+            for (int i = 0; i < intList.size(); i++) {
+                buttonList.add(new JButton());
+            }
+            for (int i = 0; i < intList.size(); i++) {
+                buttonList.get(i).setText(String.valueOf(intList.get(i)));
+                String temp = buttonList.get(i).getText();
+                buttonList.get(i).addActionListener(e -> {
+                    if(Integer.parseInt(temp)>30){
+                        showMessageDialog(null, "Number must be less or equal 30", "Error", ERROR_MESSAGE);
+                    }else {
+                        showSortScreen(initButtonsArray(createArray(Integer.parseInt(temp))));
+                    }
+                });
+                buttonPanel.add(buttonList.get(i));
+            }
+            return buttonList;
+        }
+        return null;
+    }
+
+    //func for delete buttons, when you need to generate new buttons array
     public void resetFrame() { //func that delete buttons from frame, if we need to generate new buttons
         if (buttonList != null) {
-            for (JButton jButton : buttonList) {
-                buttonPanel.remove(jButton);
+            for (int i = 0; i < buttonList.size(); i++) {
+                buttonPanel.remove(buttonList.get(i));
             }
         }
     }
 
+    //create integer array, elements of this array will be text of buttons
     public ArrayList<Integer> createArray(int size){
         if(size!=0){
             isLower = false;
@@ -194,9 +221,13 @@ public class Main extends JFrame {
         return null;
     }
 
+    //for animate sort/start second thread
     private void startThread() {
         sortButton.setEnabled(false);
         resetButton.setEnabled(false);
+        for (JButton button: buttonList) {
+            button.setEnabled(false);
+        }
         new Thread() {
             public void run() {
                 if(order){
@@ -204,6 +235,9 @@ public class Main extends JFrame {
                         sortingDesc(listToSort,0,listToSort.size()-1);
                         sortButton.setEnabled(true);
                         resetButton.setEnabled(true);
+                        for (JButton button: buttonList) {
+                            button.setEnabled(true);
+                        }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -213,6 +247,9 @@ public class Main extends JFrame {
                         sortingIncr(listToSort,0,listToSort.size()-1);
                         sortButton.setEnabled(true);
                         resetButton.setEnabled(true);
+                        for (JButton button: buttonList) {
+                            button.setEnabled(true);
+                        }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -222,31 +259,8 @@ public class Main extends JFrame {
         }.start();
     }
 
-
-    public List<JButton> initButtonsArray(ArrayList intList) {
-        resetFrame();
-        if (intList.size() != 0) {
-            buttonList = new ArrayList<>();
-            for (int i = 0; i < intList.size(); i++) {
-                buttonList.add(new JButton());
-            }
-            for (int i = 0; i < intList.size(); i++) {
-                buttonList.get(i).setText(String.valueOf(intList.get(i)));
-                String temp = buttonList.get(i).getText();
-                buttonList.get(i).addActionListener(e -> {
-                    if(Integer.parseInt(temp)>30){
-                        showMessageDialog(null, "Number must be less or equal 30", "Error", ERROR_MESSAGE);
-                    }else {
-                        showSortScreen(initButtonsArray(createArray(Integer.parseInt(temp))));
-                    }
-                });
-                buttonPanel.add(buttonList.get(i));
-            }
-            return buttonList;
-        }
-        return null;
-    }
-
+    
+    //sort consist from 2 func partition and sort. there's 2 way to sort descending and increasing orders
     public int partitionIncr(ArrayList<Integer> list, int low, int high) throws InterruptedException {
         int pivot = list.get(high);
         int i = (low - 1);
@@ -259,18 +273,18 @@ public class Main extends JFrame {
                 int temp = list.get(i);
                 list.set(i, list.get(j));
                 list.set(j, temp);
-                Thread.sleep(1000);
-                showSortScreen(initButtonsArray(list));
+                Thread.sleep(500);
+                showSortScreen(updateButtons(list));
             }
         }
 
         int temp = list.get(i+1);
         list.set(i+1, list.get(high));
         list.set(high, temp);
-        showSortScreen(initButtonsArray(list));
+        Thread.sleep(500);
+        showSortScreen(updateButtons(list));
         return (i + 1);
     }
-
     public void sortingIncr(ArrayList<Integer> list, int left, int right) throws InterruptedException {
         if(left < right)
         {
@@ -289,15 +303,15 @@ public class Main extends JFrame {
                 int temp = list.get(i);
                 list.set(i, list.get(j));
                 list.set(j, temp);
-                showSortScreen(initButtonsArray(list));
-                Thread.sleep(1000);
+                showSortScreen(updateButtons(list));
+                Thread.sleep(500);
             }
         }
         int temp = list.get(i);
         list.set(i, list.get(low));
         list.set(low, temp);
-        Thread.sleep(1000);
-        showSortScreen(initButtonsArray(list));
+        Thread.sleep(500);
+        showSortScreen(updateButtons(list));
         return i;
 
     }
@@ -310,24 +324,29 @@ public class Main extends JFrame {
         }
     }
 
+
+    //check errors when enter value in text field on main screen
     public Integer checkKeyInputErrors(String text) {
         try {
             if (text.trim().length() == 0) {
                 showMessageDialog(null, "Empty field", "Error", ERROR_MESSAGE);
                 count = 0;
             } else if (Integer.parseInt(text) <= 0) {
-                showMessageDialog(null, "Number must be positive", "Error", ERROR_MESSAGE);
-                count = 0;
+               throw new NullPointerException();
             }else {
                 count = Integer.parseInt(text);
             }
         } catch (NumberFormatException e) {
             showMessageDialog(null, "Invalid number", "Error", ERROR_MESSAGE);
+
+        }catch (NullPointerException e){
+            showMessageDialog(null, "Number must be positive", "Error", ERROR_MESSAGE);
+
         }
         return count;
     } //check input errors func
 
-
+    //init all unique elements in program
     public void initElements() { // func to initiate all gui components in program
         enterSizeButton = new JButton("Enter");
         sortButton = new JButton("Sort");
@@ -338,13 +357,13 @@ public class Main extends JFrame {
         sizeTextField = new JTextField();
     }
 
-
+    //configure all unique elements in program
     public void configureElements(){
         buttonPanel.setLayout(new ColumnLayout());
 
         buttonScrollPane.setViewportView( buttonPanel );
         buttonScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        buttonScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        buttonScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         buttonScrollPane.setBounds(50, 30, 750, 500);
 
         sizeTextField.setBounds(300, 250, 190, 25);
@@ -373,6 +392,20 @@ public class Main extends JFrame {
         mainFrame.setVisible(true);
     }
 
+    //func to show sort screen
+    public void showSortScreen(List arrayList) {
+        if (arrayList != null) {
+            buttonScrollPane.setVisible(false);
+            enterSizeButton.setVisible(false);
+            enterSizeLabel.setVisible(false);
+            sizeTextField.setVisible(false);
+            resetButton.setVisible(true);
+            sortButton.setVisible(true);
+            buttonScrollPane.setVisible(true);
+        }
+    }
+
+    //show main screen of program
     public void showMainScreen() {  //show main screen
         resetFrame();
         sizeTextField.setVisible(true);
@@ -384,6 +417,7 @@ public class Main extends JFrame {
         buttonScrollPane.setVisible(false);
     }
 
+    //constructor where makes all preparation to correct work of application
     public Main() {
         super("Homework");
         initElements(); //initiate elements
@@ -393,7 +427,7 @@ public class Main extends JFrame {
 
 
     public static void main(String[] args) {
-       SwingUtilities.invokeLater(()->new Main());
+           SwingUtilities.invokeLater(()->new Main());
 
     }
 }
