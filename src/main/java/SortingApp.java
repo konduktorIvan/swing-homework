@@ -15,11 +15,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-
 import static javax.swing.JOptionPane.ERROR_MESSAGE;
 import static javax.swing.JOptionPane.showMessageDialog;
-
-
 
 /**
  * SortingApp is desktop application that sort elements in real time.
@@ -40,11 +37,6 @@ public class SortingApp extends JFrame {
     private int count; //number that input in main screen
     private ArrayList<Integer> listToSort; //list of int for sort
     private ArrayList<JButton> buttonList; //list of buttons for show on sort screen
-
-
-
-
-    //custom layout manager for scroll pane
 
     /**
      * This class gives coordinates to buttons on sort screen according to the task.
@@ -93,8 +85,6 @@ public class SortingApp extends JFrame {
                 }
             }
         }
-
-        // Required by LayoutManager. /
 
         public Dimension preferredLayoutSize(Container parent) {
             Dimension dim = new Dimension(0, 0);
@@ -146,8 +136,6 @@ public class SortingApp extends JFrame {
         }
     }
 
-    //update buttons in sort func
-
     /**
      * This method for update buttons text and ActionListener in buttonList that take part in sort.
      *
@@ -171,8 +159,6 @@ public class SortingApp extends JFrame {
         }
         return buttonList;
     }
-
-
 
     /**
      * This method initiate buttonList, add text on buttons, ActionListeners and add buttons to button panel.
@@ -204,8 +190,6 @@ public class SortingApp extends JFrame {
         }
         return null;
     }
-
-
 
     /**
      * This method clears button panel, when you click on reset button.
@@ -247,7 +231,6 @@ public class SortingApp extends JFrame {
         return null;
     }
 
-
     /**
      * This method starts second thread and animate sorting.
      */
@@ -285,10 +268,6 @@ public class SortingApp extends JFrame {
             }
         }).start();
     }
-
-
-
-    //sort consist from 2 func partition and sort. there's 2 way to sort descending and increasing orders
 
     /**
      * This method sort elements with quicksort algorithm in increasing order.
@@ -369,9 +348,6 @@ public class SortingApp extends JFrame {
         }
     }
 
-
-
-
     /**
      * This method convert string from text field on main screen to integer and check it on empty field, input negative or zero number
      * and not integer value(letters and other not numeric symbols).
@@ -399,7 +375,6 @@ public class SortingApp extends JFrame {
         return count;
     }
 
-
     /**
      * This method allocates memory on all unique elements in program.
      */
@@ -413,7 +388,6 @@ public class SortingApp extends JFrame {
         sizeTextField = new JTextField();
     }
 
-    //configure all unique elements in program
 
     /**
      * This method configure all unique elements in program. Gives size, location, other settings.
@@ -452,9 +426,6 @@ public class SortingApp extends JFrame {
         mainFrame.setVisible(true);
     }
 
-
-    //func to show sort screen
-
     /**
      * This method show elements that present on sort screen and hide elements from main screen.
      * @param arrayList ArrayList of buttons that will show in buttonPanel.
@@ -470,8 +441,6 @@ public class SortingApp extends JFrame {
             buttonScrollPane.setVisible(true);
         }
     }
-
-    //show main screen of program
 
     /**
      * This method show elements that present on main screen and hide elements from sort screen.
