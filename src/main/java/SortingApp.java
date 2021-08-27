@@ -19,7 +19,14 @@ import javax.swing.SwingUtilities;
 import static javax.swing.JOptionPane.ERROR_MESSAGE;
 import static javax.swing.JOptionPane.showMessageDialog;
 
-public class Main extends JFrame {
+
+
+/**
+ * SortingApp is desktop application that sort elements in real time.
+ *
+ * @author Kirill Osipenko
+ */
+public class SortingApp extends JFrame {
 
     private final JFrame mainFrame = new JFrame(); //main frame
     private JPanel buttonPanel;
@@ -38,6 +45,11 @@ public class Main extends JFrame {
 
 
     //custom layout manager for scroll pane
+
+    /**
+     * This class gives coordinates to buttons on sort screen according to the task.
+     * Buttons are located in columns 10 elements each.
+     */
     static class ColumnLayout implements LayoutManager {
         private final int vgap;
         int x;
@@ -83,6 +95,7 @@ public class Main extends JFrame {
         }
 
         // Required by LayoutManager. /
+
         public Dimension preferredLayoutSize(Container parent) {
             Dimension dim = new Dimension(0, 0);
 
@@ -134,6 +147,13 @@ public class Main extends JFrame {
     }
 
     //update buttons in sort func
+
+    /**
+     * This method for update buttons text and ActionListener in buttonList that take part in sort.
+     *
+     * @param intList ArrayList of integer. Every element in intList is text on every button in buttonList.
+     * @return ArrayList of JButton that shows on sort screen.
+     */
     public ArrayList<JButton> updateButtons(ArrayList<Integer> intList) {
         for (int i = 0; i < intList.size(); i++) {
             buttonList.get(i).setText(String.valueOf(intList.get(i)));
@@ -152,7 +172,14 @@ public class Main extends JFrame {
         return buttonList;
     }
 
-    //add buttons to button panel
+
+
+    /**
+     * This method initiate buttonList, add text on buttons, ActionListeners and add buttons to button panel.
+     *
+     * @param intList ArrayList of integer. Every element in intList is text on every button in buttonList.
+     * @return ArrayList of JButton that shows on sort screen.
+     */
     public List<JButton> initButtonsArray(ArrayList<Integer> intList) {
         resetFrame();
         order = true;
@@ -178,7 +205,11 @@ public class Main extends JFrame {
         return null;
     }
 
-    //func for delete buttons, when you need to generate new buttons array
+
+
+    /**
+     * This method clears button panel, when you click on reset button.
+     */
     public void resetFrame() { //func that delete buttons from frame, if we need to generate new buttons
         if (buttonList != null) {
             for (JButton jButton : buttonList) {
@@ -187,6 +218,12 @@ public class Main extends JFrame {
         }
     }
 
+    /**
+     * This method creates integer ArrayList whose elements will be the text on buttons in buttonList that takes a part in sorting.
+     *
+     * @param size Size from main screen text field.
+     * @return ArrayList of integer values.
+     */
     //create integer array, elements of this array will be text of buttons
     public ArrayList<Integer> createArray(int size){
         if(size!=0){
@@ -210,7 +247,10 @@ public class Main extends JFrame {
         return null;
     }
 
-    //for animate sort/start second thread
+
+    /**
+     * This method starts second thread and animate sorting.
+     */
     private void startThread() {
         sortButton.setEnabled(false);
         resetButton.setEnabled(false);
@@ -247,7 +287,17 @@ public class Main extends JFrame {
     }
 
 
+
     //sort consist from 2 func partition and sort. there's 2 way to sort descending and increasing orders
+
+    /**
+     * This method sort elements with quicksort algorithm in increasing order.
+     * @param list ArrayList of integers.
+     * @param low head of array part that will sort.
+     * @param high tail of array part that will sort.
+     * @return sorted ArrayList in increasing order.
+     * @throws InterruptedException Method executes in second thread.
+     */
     public int partitionIncr(ArrayList<Integer> list, int low, int high) throws InterruptedException {
         int pivot = list.get(high);
         int i = (low - 1);
@@ -281,6 +331,14 @@ public class Main extends JFrame {
         }
     }
 
+    /**
+     * This method sort elements with quicksort algorithm in descending order.
+     * @param list ArrayList of integers.
+     * @param low head of array part that will sort.
+     * @param high tail of array part that will sort.
+     * @return sorted ArrayList in descending order.
+     * @throws InterruptedException Method executes in second thread.
+     */
     public int partitionDesc(ArrayList<Integer> list, int low, int high) throws InterruptedException {
         int pivot = list.get(low);
         int i = low;
@@ -312,7 +370,15 @@ public class Main extends JFrame {
     }
 
 
-    //check errors when enter value in text field on main screen
+
+
+    /**
+     * This method convert string from text field on main screen to integer and check it on empty field, input negative or zero number
+     * and not integer value(letters and other not numeric symbols).
+     *
+     * @param text Text from text field on main screen.
+     * @return Integer value that will be a count of buttons that takes part in sort.
+     */
     public Integer checkKeyInputErrors(String text) {
         try {
             if (text.trim().length() == 0) {
@@ -331,9 +397,12 @@ public class Main extends JFrame {
 
         }
         return count;
-    } //check input errors func
+    }
 
-    //init all unique elements in program
+
+    /**
+     * This method allocates memory on all unique elements in program.
+     */
     public void initElements() { // func to initiate all gui components in program
         enterSizeButton = new JButton("Enter");
         sortButton = new JButton("Sort");
@@ -345,6 +414,10 @@ public class Main extends JFrame {
     }
 
     //configure all unique elements in program
+
+    /**
+     * This method configure all unique elements in program. Gives size, location, other settings.
+     */
     public void configureElements(){
         buttonPanel.setLayout(new ColumnLayout());
 
@@ -379,7 +452,13 @@ public class Main extends JFrame {
         mainFrame.setVisible(true);
     }
 
+
     //func to show sort screen
+
+    /**
+     * This method show elements that present on sort screen and hide elements from main screen.
+     * @param arrayList ArrayList of buttons that will show in buttonPanel.
+     */
     public void showSortScreen(List<JButton> arrayList) {
         if (arrayList != null) {
             buttonScrollPane.setVisible(false);
@@ -393,6 +472,10 @@ public class Main extends JFrame {
     }
 
     //show main screen of program
+
+    /**
+     * This method show elements that present on main screen and hide elements from sort screen.
+     */
     public void showMainScreen() {  //show main screen
         resetFrame();
         sizeTextField.setVisible(true);
@@ -404,8 +487,12 @@ public class Main extends JFrame {
         buttonScrollPane.setVisible(false);
     }
 
-    //constructor where makes all preparation to correct work of application
-    public Main() {
+
+
+    /**
+     * Constructor makes all preparation to correct work of application.
+     */
+    public SortingApp() {
         super("Homework");
         initElements(); //initiate elements
         configureElements();
@@ -414,6 +501,6 @@ public class Main extends JFrame {
 
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(Main::new);
+        SwingUtilities.invokeLater(SortingApp::new);
     }
 }
