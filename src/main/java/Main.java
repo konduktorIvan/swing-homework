@@ -21,16 +21,14 @@ import static javax.swing.JOptionPane.showMessageDialog;
 
 public class Main extends JFrame {
 
-    private JFrame mainFrame = new JFrame(); //main frame
+    private final JFrame mainFrame = new JFrame(); //main frame
     private JPanel buttonPanel;
     private JButton enterSizeButton; // button for enter size on main screen
     private JButton resetButton; //reset button on a sort screen
     private JButton sortButton;  // sort button on sort screen
     private JScrollPane buttonScrollPane;
     private JTextField sizeTextField; // field for enter number
-    private Random rand;
     private JLabel enterSizeLabel; // label for main screen
-    private boolean isLower;
     private boolean order = true;
     private int count; //number that input in main screen
     private ArrayList<Integer> listToSort; //list of int for sort
@@ -41,12 +39,11 @@ public class Main extends JFrame {
 
     //custom layout manager for scroll pane
     static class ColumnLayout implements LayoutManager {
-        private int vgap;
+        private final int vgap;
         int x;
         int y;
         private int minWidth = 0, minHeight = 0;
         private int preferredWidth = 0, preferredHeight = 0;
-        private boolean sizeUnknown = true;
 
         public ColumnLayout() {
             this(5);
@@ -56,17 +53,16 @@ public class Main extends JFrame {
             vgap = v;
         }
 
-        /* Required by LayoutManager. */
+        // Required by LayoutManager. /
         public void addLayoutComponent(String name, Component comp) {
         }
 
-        /* Required by LayoutManager. */
+        // Required by LayoutManager. /
         public void removeLayoutComponent(Component comp) {
         }
 
         private void setSizes(Container parent) {
             int nComps = parent.getComponentCount();
-            Dimension d = null;
 
             //Reset preferred/minimum width and height.
             preferredWidth = 750;
@@ -77,7 +73,6 @@ public class Main extends JFrame {
             for (int i = 0; i < nComps; i++) {
                 Component c = parent.getComponent(i);
                 if (c.isVisible()) {
-                    d = c.getPreferredSize();
 
                     if (i > 60 && i%10==0) {
                         preferredWidth += 85;
@@ -87,10 +82,9 @@ public class Main extends JFrame {
             }
         }
 
-        /* Required by LayoutManager. */
+        // Required by LayoutManager. /
         public Dimension preferredLayoutSize(Container parent) {
             Dimension dim = new Dimension(0, 0);
-            int nComps = parent.getComponentCount();
 
             setSizes(parent);
 
@@ -101,15 +95,12 @@ public class Main extends JFrame {
             dim.height = preferredHeight
                     + insets.top + insets.bottom;
 
-            sizeUnknown = false;
-
             return dim;
         }
 
 
         public Dimension minimumLayoutSize(Container parent) {
             Dimension dim = new Dimension(0, 0);
-            int nComps = parent.getComponentCount();
 
             //Always add the container's insets!
             Insets insets = parent.getInsets();
@@ -117,8 +108,6 @@ public class Main extends JFrame {
                     + insets.left + insets.right;
             dim.height = minHeight
                     + insets.top + insets.bottom;
-
-            sizeUnknown = false;
 
             return dim;
         }
@@ -138,10 +127,10 @@ public class Main extends JFrame {
         }
 
 
-    public String toString() {
-        String str = "";
-        return getClass().getName() + "[vgap=" + vgap + str + "]";
-    }
+        public String toString() {
+            String str = "";
+            return getClass().getName() + "[vgap=" + vgap + str + "]";
+        }
     }
 
     //update buttons in sort func
@@ -149,9 +138,9 @@ public class Main extends JFrame {
         for (int i = 0; i < intList.size(); i++) {
             buttonList.get(i).setText(String.valueOf(intList.get(i)));
             String temp = buttonList.get(i).getText();
-                for( ActionListener al : buttonList.get(i).getActionListeners() ) {
-                    buttonList.get(i).removeActionListener( al );
-                }
+            for( ActionListener al : buttonList.get(i).getActionListeners() ) {
+                buttonList.get(i).removeActionListener( al );
+            }
             buttonList.get(i).addActionListener(e -> {
                 if (Integer.parseInt(temp) > 30) {
                     showMessageDialog(null, "Number must be less or equal 30", "Error", ERROR_MESSAGE);
@@ -164,7 +153,7 @@ public class Main extends JFrame {
     }
 
     //add buttons to button panel
-    public List<JButton> initButtonsArray(ArrayList intList) {
+    public List<JButton> initButtonsArray(ArrayList<Integer> intList) {
         resetFrame();
         order = true;
         if (intList != null) {
@@ -192,8 +181,8 @@ public class Main extends JFrame {
     //func for delete buttons, when you need to generate new buttons array
     public void resetFrame() { //func that delete buttons from frame, if we need to generate new buttons
         if (buttonList != null) {
-            for (int i = 0; i < buttonList.size(); i++) {
-                buttonPanel.remove(buttonList.get(i));
+            for (JButton jButton : buttonList) {
+                buttonPanel.remove(jButton);
             }
         }
     }
@@ -201,9 +190,9 @@ public class Main extends JFrame {
     //create integer array, elements of this array will be text of buttons
     public ArrayList<Integer> createArray(int size){
         if(size!=0){
-            isLower = false;
-            listToSort = new ArrayList();
-            rand = new Random();
+            boolean isLower = false;
+            listToSort = new ArrayList<>();
+            Random rand = new Random();
             for(int i = 0; i < size; i++){
                 this.listToSort.add(rand.nextInt(1000)+1);
             }
@@ -228,38 +217,36 @@ public class Main extends JFrame {
         for (JButton button: buttonList) {
             button.setEnabled(false);
         }
-        new Thread() {
-            public void run() {
-                if(order){
-                    try {
-                        sortingDesc(listToSort,0,listToSort.size()-1);
-                        sortButton.setEnabled(true);
-                        resetButton.setEnabled(true);
-                        for (JButton button: buttonList) {
-                            button.setEnabled(true);
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+        new Thread(() -> {
+            if(order){
+                try {
+                    sortingDesc(listToSort,0,listToSort.size()-1);
+                    sortButton.setEnabled(true);
+                    resetButton.setEnabled(true);
+                    for (JButton button: buttonList) {
+                        button.setEnabled(true);
                     }
-                    order = false;
-                } else {
-                    try {
-                        sortingIncr(listToSort,0,listToSort.size()-1);
-                        sortButton.setEnabled(true);
-                        resetButton.setEnabled(true);
-                        for (JButton button: buttonList) {
-                            button.setEnabled(true);
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    order = true;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
+                order = false;
+            } else {
+                try {
+                    sortingIncr(listToSort,0,listToSort.size()-1);
+                    sortButton.setEnabled(true);
+                    resetButton.setEnabled(true);
+                    for (JButton button: buttonList) {
+                        button.setEnabled(true);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                order = true;
             }
-        }.start();
+        }).start();
     }
 
-    
+
     //sort consist from 2 func partition and sort. there's 2 way to sort descending and increasing orders
     public int partitionIncr(ArrayList<Integer> list, int low, int high) throws InterruptedException {
         int pivot = list.get(high);
@@ -332,7 +319,7 @@ public class Main extends JFrame {
                 showMessageDialog(null, "Empty field", "Error", ERROR_MESSAGE);
                 count = 0;
             } else if (Integer.parseInt(text) <= 0) {
-               throw new NullPointerException();
+                throw new NullPointerException();
             }else {
                 count = Integer.parseInt(text);
             }
@@ -393,7 +380,7 @@ public class Main extends JFrame {
     }
 
     //func to show sort screen
-    public void showSortScreen(List arrayList) {
+    public void showSortScreen(List<JButton> arrayList) {
         if (arrayList != null) {
             buttonScrollPane.setVisible(false);
             enterSizeButton.setVisible(false);
@@ -427,7 +414,6 @@ public class Main extends JFrame {
 
 
     public static void main(String[] args) {
-           SwingUtilities.invokeLater(()->new Main());
-
+        SwingUtilities.invokeLater(Main::new);
     }
 }
