@@ -192,9 +192,9 @@ public class SortingApp extends JFrame {
     }
 
     /**
-     * This method clears button panel, when you click on reset button.
+     * This method clears button panel if we need to generate new buttons, when you click on reset button.
      */
-    public void resetFrame() { //func that delete buttons from frame, if we need to generate new buttons
+    public void resetFrame() { 
         if (buttonList != null) {
             for (JButton jButton : buttonList) {
                 buttonPanel.remove(jButton);
@@ -208,7 +208,6 @@ public class SortingApp extends JFrame {
      * @param size Size from main screen text field.
      * @return ArrayList of integer values.
      */
-    //create integer array, elements of this array will be text of buttons
     public ArrayList<Integer> createArray(int size){
         if(size!=0){
             boolean isLower = false;
@@ -445,7 +444,7 @@ public class SortingApp extends JFrame {
     /**
      * This method show elements that present on main screen and hide elements from sort screen.
      */
-    public void showMainScreen() {  //show main screen
+    public void showMainScreen() {
         resetFrame();
         sizeTextField.setVisible(true);
         enterSizeLabel.setVisible(true);
@@ -463,9 +462,9 @@ public class SortingApp extends JFrame {
      */
     public SortingApp() {
         super("Homework");
-        initElements(); //initiate elements
+        initElements();
         configureElements();
-        showMainScreen(); //show main screen elements pack
+        showMainScreen();
     }
 
 
